@@ -1,6 +1,6 @@
 import requests
 
-SITES = ["https://google.com", "https://gitbob.com"]
+SITES = ["https://google.com", "https://github.com"]
 
 for site in SITES:
     try:
