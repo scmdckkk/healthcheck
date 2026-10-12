@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Забрать код
+        uses: actions/checkout@v4
+
+      - name: Собрать Docker-образ
+        run: docker build -t healthcheck .
+
+      - name: Запустить контейнер
+        run: docker run --rm healthcheck
