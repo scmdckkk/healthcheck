@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import requests
 
-from main import check_site
+from main import check_site, load_sites
 
 
 def test_site_ok():
@@ -16,3 +16,9 @@ def test_site_error():
         url, result = check_site("https://example.com")
     assert url == "https://example.com"
     assert "ОШИБКА" in result
+
+
+def test_load_sites_skips_comments_and_blanks(tmp_path):
+    f = tmp_path / "sites.txt"
+    f.write_text("# комментарий\n\nhttps://a.com\n  https://b.com  \n", encoding="utf-8")
+    assert load_sites(f) == ["https://a.com", "https://b.com"]

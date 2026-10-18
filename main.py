@@ -1,6 +1,18 @@
+from pathlib import Path
+
 import requests
 
-SITES = ["https://google.com", "https://github.com"]
+SITES_FILE = Path(__file__).parent / "sites.txt"
+
+
+def load_sites(path=SITES_FILE):
+    """Читает адреса из файла, пропуская пустые строки и комментарии."""
+    sites = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            sites.append(line)
+    return sites
 
 
 def check_site(url, timeout=5):
@@ -13,7 +25,7 @@ def check_site(url, timeout=5):
 
 
 def main():
-    for site in SITES:
+    for site in load_sites():
         url, result = check_site(site)
         print(f"{url} -> {result}")
 

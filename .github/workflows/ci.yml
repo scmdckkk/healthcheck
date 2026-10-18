@@ -33,5 +33,9 @@ jobs:
       - name: Собрать Docker-образ
         run: docker build -t healthcheck .
 
-      - name: Запустить контейнер
-        run: docker run --rm healthcheck
+      - name: Запустить контейнер и проверить ответ
+        run: |
+          docker run -d --name hc -p 5000:5000 healthcheck
+          sleep 5
+          curl --fail http://localhost:5000/api/status
+          docker stop hc
