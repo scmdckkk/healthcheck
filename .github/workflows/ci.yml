@@ -30,12 +30,23 @@ jobs:
       - name: Забрать код
         uses: actions/checkout@v4
 
-      - name: Собрать Docker-образ
-        run: docker build -t healthcheck .
+      - name: Поднять сервисы
+        run: docker compose up -d --build
 
-      - name: Запустить контейнер и проверить ответ
+      - name: Дождаться данных в API
         run: |
-          docker run -d --name hc -p 5000:5000 healthcheck
-          sleep 5
-          curl --fail http://localhost:5000/api/status
-          docker stop hc
+          for i in $(seq 1 30); do
+            if curl -fs http://localhost:5000/api/status | grep -q '"url"'; then
+              echo "Данные появились"
+              curl -s http://localhost:5000/api/status
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Данных нет, логи сервисов:"
+          docker compose logs
+          exit 1
+
+      - name: Остановить сервисы
+        if: always()
+        run: docker compose down -v

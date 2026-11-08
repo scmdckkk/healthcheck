@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template_string
 
-from main import check_site, load_sites
+from db import latest_checks
 
 app = Flask(__name__)
 
@@ -15,14 +15,17 @@ PAGE = """
     li { margin: 8px 0; }
     .ok { color: green; }
     .bad { color: crimson; }
+    small { color: gray; }
   </style>
 </head>
 <body>
   <h1>Статус сайтов</h1>
+  {% if not rows %}<p>Данных пока нет, подожди минуту и обнови страницу.</p>{% endif %}
   <ul>
   {% for row in rows %}
     <li class="{{ 'ok' if row.ok else 'bad' }}">
       {{ '✅' if row.ok else '❌' }} {{ row.url }} — {{ row.status }}
+      <small>({{ row.checked_at }})</small>
     </li>
   {% endfor %}
   </ul>
@@ -32,20 +35,11 @@ PAGE = """
 """
 
 
-def collect():
-    rows = []
-    for site in load_sites():
-        url, status = check_site(site)
-        ok = isinstance(status, int) and 200 <= status < 400
-        rows.append({"url": url, "status": status, "ok": ok})
-    return rows
-
-
 @app.route("/")
 def index():
-    return render_template_string(PAGE, rows=collect())
+    return render_template_string(PAGE, rows=latest_checks())
 
 
 @app.route("/api/status")
 def api_status():
-    return jsonify(collect())
+    return jsonify(latest_checks())
