@@ -49,3 +49,15 @@ def latest_checks():
                 {"url": u, "status": s, "ok": ok, "checked_at": str(t)}
                 for u, s, ok, t in cur.fetchall()
             ]
+
+
+def last_ok(url):
+    """Результат прошлой проверки сайта: True, False или None, если проверок не было."""
+    with closing(get_conn()) as conn, conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT ok FROM checks WHERE url = %s ORDER BY checked_at DESC LIMIT 1",
+                (url,),
+            )
+            row = cur.fetchone()
+            return row[0] if row else None
