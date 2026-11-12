@@ -30,6 +30,9 @@ jobs:
       - name: Забрать код
         uses: actions/checkout@v4
 
+      - name: Создать .env из шаблона (для одноразовой тестовой базы)
+        run: cp .env.example .env
+
       - name: Поднять сервисы
         run: docker compose up -d --build
 
