@@ -2,13 +2,13 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: healthcheck
-      POSTGRES_PASSWORD: healthcheck
-      POSTGRES_DB: healthcheck
+      POSTGRES_USER: ${POSTGRES_USER:?нужен файл .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?нужен файл .env}
+      POSTGRES_DB: ${POSTGRES_DB:?нужен файл .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U healthcheck"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 3s
       timeout: 3s
       retries: 10
@@ -17,7 +17,7 @@ services:
     build: .
     command: python checker.py
     environment:
-      DATABASE_URL: postgresql://healthcheck:healthcheck@db:5432/healthcheck
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       CHECK_INTERVAL: "60"
     depends_on:
       db:
@@ -28,7 +28,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: postgresql://healthcheck:healthcheck@db:5432/healthcheck
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     depends_on:
       db:
         condition: service_healthy
